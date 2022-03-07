@@ -1,0 +1,35 @@
+version: '3'
+
+volumes:
+  db-data:
+
+services:
+  api:
+    build: ./api
+    ports:
+      - '3000:3000'
+    volumes:
+      - './api:/myapp'
+    environment:
+      - 'DATABASE_PASSWORD=password'
+    tty: true
+    stdin_open: true
+    depends_on:
+      - db
+    links:
+      - db
+  db:
+    image: postgres
+    volumes:
+      - 'db-data:/var/lib/postgresql/data'
+    environment:
+      POSTGRES_PASSWORD: password
+  front:
+    build: ./front
+    ports:
+      - '8080:8080'
+    volumes:
+      - './front:/myapp'
+    tty: true
+    stdin_open: true
+
