@@ -121,6 +121,7 @@ export default {
       gameOverFlag: false,
       gameOverTimer: undefined,
       loading: false,
+      remainingPairs: 9
     }
   },
   watch: {
@@ -139,6 +140,21 @@ export default {
         // ゲームオーバーフラグをリセット
         this.gameOverFlag = false;
       }
+    },
+    remainingPairs: function(newVal) {
+      if(newVal === 0) {
+        // メッセージを表示
+        this.informationComment = "ゲームクリア！おめでとう！"
+        // カード説明をリセット
+        this.cardExplain = null;
+        // タイマー停止（削除）
+        clearTimeout(this.gameOverTimer);
+        // うさぎ停止
+        this.startRabbit = false;
+        // その他設定をスタート前に戻す
+        this.gameState = 'waiting'
+        this.buttonText = 'START'
+      }
     }
   },
   methods: {
@@ -152,13 +168,15 @@ export default {
     // 設定エリア -----------------------------------------------
     // STARTボタンクリック時の処理
     async gameStart() {
-      this.controllgameState(); // ゲームの状態を管理
+      this.controllGameState(); // ゲームの状態を管理
       if(this.gameState === 'playing') this.loading = true // ゲームスタートで読み込み画面表示
       this.reverseAllCard();  // カードを全て裏にする
       this.refleshCardOpenStatus(); // カード開示状況の初期化
       if(this.gameState === 'playing') await this.getQuestions();  // カードをセット
       this.operateRabbit();  // うさぎを操作する
       this.startTimer(); // タイマーを開始する
+      this.remainingPairs = 9;
+      this.informationComment = null;
       this.loading = false
     },
     // タイマーを開始する
@@ -172,7 +190,7 @@ export default {
       }
     },
     // ゲームの状態を管理
-    controllgameState() {
+    controllGameState() {
       if (this.gameState === 'playing' || this.gameState === 'gameOver') {
         this.gameState = 'waiting'
         this.buttonText = 'START'
@@ -266,6 +284,7 @@ export default {
         this.cardStatus[this.previousClickedIndex]['cleared'] = true;
         this.informationComment = "当たり！"
         this.cardExplain = cardExplain;
+        this.remainingPairs = this.remainingPairs - 1;
       } else {
         // 違う絵柄だった時 => カードを裏にする
         this.cardStatus[this.clickedIndex]['opened'] = false;
@@ -346,7 +365,7 @@ export default {
 // タイマーエリア -------------------------------------------------
 .timer-area {
   width: 80%;
-  height: 50px;
+  height: 90px;
   margin: 60px auto;
   margin-top: 20px;
 }
