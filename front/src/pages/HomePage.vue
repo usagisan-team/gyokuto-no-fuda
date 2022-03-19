@@ -19,20 +19,17 @@
               <option value="JavaScript">JavaScript</option>
             </select>
           </div>
-          <!-- 難易度 -->
-          <!-- body__setting--difficulty -->
-
           <!-- START -->
           <!-- body__setting--start -->
           <v-btn x-large v-on:click="gameStart()">
-            START
+            {{buttonText}}
           </v-btn>
         </div>
       </div>
 
       <!-- タイマーエリア ------------------------------------------------->
       <div class="timer-area">
-        <div class="moving-area">
+        <div :class="{'moving-area': startRabbit}">
           <img src="@/assets/usagi.png" alt="rabbit-image" class="moving-rabbit">
         </div>
         <div class="time-bar"></div>
@@ -114,7 +111,28 @@ export default {
       selectedCategory: 'JavaScript',
       clickedIndex: null,
       previousClickedIndex: null,
-      openedCardNum: 0
+      openedCardNum: 0,
+      startRabbit: false,
+      gameState: 'waiting', // 'waiting' or 'playing' or 'gameOver'
+      buttonText: 'START',
+      gameOverFlag: false,
+      gameOverTimer: undefined,
+    }
+  },
+  watch: {
+    // ゲームオーバーになっていないか監視している
+    gameOverFlag: function(newVal) {
+      if(newVal) {
+        // --- ゲームオーバーになった場合の処理 ---
+        // 裏のカードを全て表にする
+        for (const card of this.cardStatus) {
+            card['opened'] = true;
+        }
+        // メッセージを表示
+
+        // ゲームオーバーフラグをリセット
+        this.gameOverFlag = false;
+      }
     }
   },
   methods: {
@@ -128,9 +146,32 @@ export default {
     // 設定エリア -----------------------------------------------
     // STARTボタンクリック時の処理
     gameStart() {
+      this.controllgameState(); // ゲームの状態を管理
       this.reverseAllCard();  // カードを全て裏にする
       this.refleshCardOpenStatus(); // カード開示状況の初期化
       this.getQuestions();  // カードをセット
+      this.operateRabbit();  // うさぎを操作する
+      this.startTimer(); // タイマーを開始する
+    },
+    // タイマーを開始する
+    startTimer() {
+      clearTimeout(this.gameOverTimer);
+      if(this.gameState === 'playing' || this.gameState === 'gameOver') {
+        this.gameOverTimer = setTimeout(() => {
+          this.gameOverFlag = true}
+          ,60100
+        )
+      }
+    },
+    // ゲームの状態を管理
+    controllgameState() {
+      if (this.gameState === 'playing' || this.gameState === 'gameOver') {
+        this.gameState = 'waiting'
+        this.buttonText = 'START'
+      } else {
+        this.gameState = 'playing'
+        this.buttonText = 'GIVE UP'
+      }
     },
     // 全てのカードを裏にする
     reverseAllCard() {
@@ -190,6 +231,14 @@ export default {
       this.cardStatus[17]['explain'] = 'temp8'
     },
     // タイマーエリア --------------------------------------------
+    // うさぎを操作する
+    operateRabbit() {
+      if (this.startRabbit) {
+        this.startRabbit = false;
+      } else {
+        this.startRabbit = true;
+      }
+    },
     // カードエリア ----------------------------------------------
     // 行と列からカードの配列番号を調べる
     cardIndex(rowNumber, colNumber) {
@@ -304,6 +353,7 @@ export default {
   animation-duration: 60s; // アニメーションの時間
   animation-timing-function: linear; // 一定の速さで再生
   animation-direction: normal; // 左から右に再生
+  animation-fill-mode:forwards; // 最後の状態で停止
 }
 .moving-rabbit {
   width: 7%;
