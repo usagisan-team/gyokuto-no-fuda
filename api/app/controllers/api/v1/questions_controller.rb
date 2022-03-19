@@ -17,13 +17,13 @@ class Api::V1::QuestionsController < ApplicationController
         search_keyword = "HTML"
       when "css" then
         search_keyword = "CSS"
-      when "ruby"
+      when "ruby" then
         search_keyword = "Ruby"
-      when "java"
+      when "java" then
         search_keyword = "Java"
-      when "linux"
+      when "linux" then
         search_keyword = "Linux"
-      when "javascript"
+      when "javascript" then
         search_keyword = "JavaScript"
     end
     category_id = Category.find_by(language: search_keyword)

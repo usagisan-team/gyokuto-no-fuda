@@ -11,12 +11,12 @@
           <div class="body__setting-category">
             <div class="setting-category-title">言語</div>
             <select v-model="selectedCategory" class="setting-category-select">
-              <option value="HTML">HTML</option>
-              <option value="CSS">CSS</option>
-              <option value="Ruby">Ruby</option>
-              <option value="Java">Java</option>
-              <option value="Linux">Linux</option>
-              <option value="JavaScript">JavaScript</option>
+              <option value="html">HTML</option>
+              <option value="css">CSS</option>
+              <option value="ruby">Ruby</option>
+              <option value="java">Java</option>
+              <option value="linux">Linux</option>
+              <option value="javascript">JavaScript</option>
             </select>
           </div>
           <!-- START -->
@@ -84,7 +84,7 @@
   </span>
 </template>
 <script>
-// import axios from 'axios';
+import axios from 'axios';
 export default {
   data () {
     return {
@@ -108,7 +108,7 @@ export default {
         { word: "", explain: "", opened: false, cleared: false},
         { word: "", explain: "", opened: false, cleared: false}
       ],
-      selectedCategory: 'JavaScript',
+      selectedCategory: 'javascript',
       clickedIndex: null,
       previousClickedIndex: null,
       openedCardNum: 0,
@@ -182,53 +182,15 @@ export default {
     },
     // バックエンドからカード情報を取得する
     async getQuestions() {
-      // const language = "html"
-      // await axios.get(`http://localhost:3000/api/v1/questions/${language}`).then(res => {
-      //   const questions = res.data['questions']
-      //   const length = this.cardStatus.length
-      //   for(let index = 0; index < length ; index++) {
-      //     this.cardStatus[index]['word'] = questions[index]['word']
-      //     this.cardStatus[index]['explain'] = questions[index]['explain']
-      //   }
-      // })
-
-      // ダミーデータ
-      this.cardStatus[0]['word'] = 'temp2',
-      this.cardStatus[0]['explain'] = 'temp2',
-      this.cardStatus[1]['word'] = 'temp1',
-      this.cardStatus[1]['explain'] = 'temp1',
-      this.cardStatus[2]['word'] = 'temp2',
-      this.cardStatus[2]['explain'] = 'temp2',
-      this.cardStatus[3]['word'] = 'temp3',
-      this.cardStatus[3]['explain'] = 'temp3',
-      this.cardStatus[4]['word'] = 'temp4',
-      this.cardStatus[4]['explain'] = 'temp4',
-      this.cardStatus[5]['word'] = 'temp5',
-      this.cardStatus[5]['explain'] = 'temp5',
-      this.cardStatus[6]['word'] = 'temp6',
-      this.cardStatus[6]['explain'] = 'temp6',
-      this.cardStatus[7]['word'] = 'temp1',
-      this.cardStatus[7]['explain'] = 'temp1',
-      this.cardStatus[8]['word'] = 'temp9',
-      this.cardStatus[8]['explain'] = 'temp9',
-      this.cardStatus[9]['word'] = 'temp7',
-      this.cardStatus[9]['explain'] = 'temp7',
-      this.cardStatus[10]['word'] = 'temp9',
-      this.cardStatus[10]['explain'] = 'temp9',
-      this.cardStatus[11]['word'] = 'temp4',
-      this.cardStatus[11]['explain'] = 'temp4',
-      this.cardStatus[12]['word'] = 'temp5',
-      this.cardStatus[12]['explain'] = 'temp5',
-      this.cardStatus[13]['word'] = 'temp6',
-      this.cardStatus[13]['explain'] = 'temp6',
-      this.cardStatus[14]['word'] = 'temp3',
-      this.cardStatus[14]['explain'] = 'temp3',
-      this.cardStatus[15]['word'] = 'temp8',
-      this.cardStatus[15]['explain'] = 'temp8',
-      this.cardStatus[16]['word'] = 'temp7',
-      this.cardStatus[16]['explain'] = 'temp7',
-      this.cardStatus[17]['word'] = 'temp8',
-      this.cardStatus[17]['explain'] = 'temp8'
+      await axios.get(`http://localhost:3000/api/v1/questions/${this.selectedCategory}`).then(res => {
+        const questions = res.data['questions']
+        console.log('questions: ', questions);
+        const length = this.cardStatus.length
+        for(let index = 0; index < length ; index++) {
+          this.cardStatus[index]['word'] = questions[index]['word']
+          this.cardStatus[index]['explain'] = questions[index]['explain']
+        }
+      })
     },
     // タイマーエリア --------------------------------------------
     // うさぎを操作する
@@ -265,7 +227,8 @@ export default {
       const clickedCardStatus = this.cardStatus[clickedIndex];
       if (this.openedCardNum < 2 &&                 // 表になっているカードが０枚か１枚
           clickedCardStatus['opened'] === false &&  // 選択されたカードがまだ表になっていない
-          clickedCardStatus['cleared'] === false) { // 選択されたカードが正解済みでない
+          clickedCardStatus['cleared'] === false && // 選択されたカードが正解済みでない
+          this.gameState === 'playing') {           // スタートボタンが押されている
         // 選択中カード（今回・前回）を更新
         this.previousClickedIndex = this.clickedIndex;
         this.clickedIndex = clickedIndex;
