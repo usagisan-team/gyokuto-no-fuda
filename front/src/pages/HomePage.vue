@@ -32,6 +32,10 @@
 
       <!-- タイマーエリア ------------------------------------------------->
       <div class="timer-area">
+        <div class="moving-area">
+          <img src="@/assets/usagi.png" alt="rabbit-image" class="moving-rabbit">
+        </div>
+        <div class="time-bar"></div>
       </div>
       <!-- カードエリア --------------------------------------------------->
       <div class="card-area">
@@ -290,6 +294,38 @@ export default {
   font-weight: bold;
 }
 // タイマーエリア -------------------------------------------------
+.timer-area {
+  width: 80%;
+  height: 50px;
+  margin: 60px auto;
+}
+.moving-area {
+  animation-name: rabbit-image;
+  animation-duration: 60s; // アニメーションの時間
+  animation-timing-function: linear; // 一定の速さで再生
+  animation-direction: normal; // 左から右に再生
+}
+.moving-rabbit {
+  width: 7%;
+  height: auto;
+  position: relative;
+  left: 10%;
+  bottom: 10%;
+}
+@keyframes rabbit-image {
+  from {
+    transform: translateX(0%);
+  }
+  to {
+    transform: translateX(75%);
+  }
+}
+.time-bar {
+  width: 80%;
+  margin: 0 auto;
+  border: 8px solid green;
+  border-radius: 20px;
+}
 // カードエリア --------------------------------------------------
 .card-area {
   width:594px;
