@@ -7,8 +7,17 @@
       <!-- 設定エリア ---------------------------------------------------->
       <div class="setting-area">
         <div class="setting-block">
-          <!-- 言語選択 -->
-          <div class="body__setting-language">
+          <!-- カテゴリ選択 -->
+          <div class="body__setting-category">
+            <div class="setting-category-title">言語</div>
+            <select v-model="selectedCategory" class="setting-category-select">
+              <option value="HTML">HTML</option>
+              <option value="CSS">CSS</option>
+              <option value="Ruby">Ruby</option>
+              <option value="Java">Java</option>
+              <option value="Linux">Linux</option>
+              <option value="JavaScript">JavaScript</option>
+            </select>
           </div>
           <!-- 難易度 -->
           <!-- body__setting--difficulty -->
@@ -98,7 +107,7 @@ export default {
         { word: "", explain: "", opened: false, cleared: false},
         { word: "", explain: "", opened: false, cleared: false}
       ],
-      // languages: ['html', 'css', 'ruby'],
+      selectedCategory: 'JavaScript',
       clickedIndex: null,
       previousClickedIndex: null,
       openedCardNum: 0
@@ -258,6 +267,27 @@ export default {
   left: 50%;
   transform: translate(-50%, -50%);
   display: flex;
+}
+.body__setting-category {
+  display: flex;
+}
+.setting-category-select {
+  width: 100px;
+  text-align: center;
+  margin-right: 30px;
+  display: block;
+  background-color: whitesmoke;
+  border-radius: 6%;
+  height: 30px;
+  margin-top: 10px;
+  box-shadow: 1px 1px 4px grey;
+}
+.setting-category-title {
+  text-align: center;
+  padding: 14px 0;
+  margin-right: 10px;
+  color: #5a5a5a;
+  font-weight: bold;
 }
 // タイマーエリア -------------------------------------------------
 // カードエリア --------------------------------------------------
