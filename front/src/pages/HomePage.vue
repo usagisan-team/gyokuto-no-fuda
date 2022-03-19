@@ -4,6 +4,7 @@
       <h1>玉兎の札-封印されし力-</h1>
     </header>
     <div class="body-area">
+    <div v-if="loading===true" class='loading'></div>
       <!-- 設定エリア ---------------------------------------------------->
       <div class="setting-area">
         <div class="setting-block">
@@ -117,6 +118,7 @@ export default {
       buttonText: 'START',
       gameOverFlag: false,
       gameOverTimer: undefined,
+      loading: false,
     }
   },
   watch: {
@@ -145,13 +147,15 @@ export default {
     },
     // 設定エリア -----------------------------------------------
     // STARTボタンクリック時の処理
-    gameStart() {
+    async gameStart() {
       this.controllgameState(); // ゲームの状態を管理
+      if(this.gameState === 'playing') this.loading = true // ゲームスタートで読み込み画面表示
       this.reverseAllCard();  // カードを全て裏にする
       this.refleshCardOpenStatus(); // カード開示状況の初期化
-      this.getQuestions();  // カードをセット
+      if(this.gameState === 'playing') await this.getQuestions();  // カードをセット
       this.operateRabbit();  // うさぎを操作する
       this.startTimer(); // タイマーを開始する
+      this.loading = false
     },
     // タイマーを開始する
     startTimer() {
@@ -184,7 +188,6 @@ export default {
     async getQuestions() {
       await axios.get(`http://localhost:3000/api/v1/questions/${this.selectedCategory}`).then(res => {
         const questions = res.data['questions']
-        console.log('questions: ', questions);
         const length = this.cardStatus.length
         for(let index = 0; index < length ; index++) {
           this.cardStatus[index]['word'] = questions[index]['word']
@@ -270,6 +273,15 @@ export default {
   border-top: solid 1px gray;
   background-color: rgb(215, 235, 236);
   height: 100%;
+}
+.loading {
+	position: fixed; /* ブラウザの定位置に固定 */
+	background: rgba(0, 0, 0, .5); /* 背景色を半透明の黒色に */
+	width: 100%; /* 要素の横幅を画面全体に */
+	height: 100%; /* 要素の高さを画面全体に */
+	top: 0; /* 要素の固定位置をブラウザ最上部に合わせる */
+	left: 0; /* 要素の固定位置をブラウザ左側に合わせる */
+	z-index: 1000; /* 要素をコンテンツより前面に（要調整） */
 }
 // 設定エリア ----------------------------------------------------
 .setting-area {

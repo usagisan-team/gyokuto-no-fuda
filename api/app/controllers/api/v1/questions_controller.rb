@@ -10,7 +10,6 @@ class Api::V1::QuestionsController < ApplicationController
     #     {'word': 'div', 'explain': 'divです'},
     #     ....
     #   }
-    data = Question.all
     language = params[:language]
     case language
       when "html" then
@@ -27,13 +26,9 @@ class Api::V1::QuestionsController < ApplicationController
         search_keyword = "JavaScript"
     end
     category_id = Category.find_by(language: search_keyword)
-    choice = data.where(category_id: category_id)
+    choice = Question.where(category_id: category_id)
     conclude = choice.as_json(only: [:word ,:explain])
-    shuffled_lists = conclude.shuffle
-    n = 9
-    pickup = shuffled_lists.slice(0,n)
-    double = pickup * 2
-    double_again = double.shuffle
-    render json: { questions: double_again }
+    pickup = conclude.shuffle.slice(0,9)
+    render json: { questions: (pickup * 2).shuffle }
   end
 end
