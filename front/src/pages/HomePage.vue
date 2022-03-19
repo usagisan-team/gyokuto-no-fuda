@@ -74,10 +74,8 @@
       <!-- 情報表示エリア ------------------------------------------------->
       <div class="information-area">
         <div class="information-block">
-          <div>選択されたカード: {{clickedCardWord}}</div>
-          <div>1つ前に選択されたカード: {{previousClickedCardWord}}</div>
-          <div>コメント: {{informationComment}}</div>
-          <div>カードの説明: {{cardExplain}}</div>
+          <h3>{{informationComment}}</h3>
+          <div>{{cardExplain}}</div>
         </div>
       </div>
     </div>
@@ -115,8 +113,6 @@ export default {
       clickedIndex: null,
       previousClickedIndex: null,
       openedCardNum: 0,
-      clickedCardWord: null,
-      previousClickedCardWord: null,
       informationComment: null,
       cardExplain: null,
       startRabbit: false,
@@ -137,7 +133,9 @@ export default {
             card['opened'] = true;
         }
         // メッセージを表示
-
+        this.informationComment = "時間切れ。また挑戦してね！"
+        // カード説明をリセット
+        this.cardExplain = null;
         // ゲームオーバーフラグをリセット
         this.gameOverFlag = false;
       }
@@ -150,9 +148,6 @@ export default {
       this.openedCardNum = 0;
       this.clickedIndex = null;
       this.previousClickedIndex = null;
-      this.clickedCardWord = null;
-      this.previousClickedCardWord = null;
-      //this.cardExplain = null;
     },
     // 設定エリア -----------------------------------------------
     // STARTボタンクリック時の処理
