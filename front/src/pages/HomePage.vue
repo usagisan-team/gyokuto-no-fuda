@@ -233,7 +233,6 @@ export default {
       const clickedIndex = this.cardIndex(rowNumber, colNumber);
       const clickedCardStatus = this.cardStatus[clickedIndex];
       const clickedCardWord = this.cardWord(rowNumber,colNumber);
-      const previousClickedCardWord = this.cardWord(rowNumber,colNumber);
       if (this.openedCardNum < 2 &&                 // 表になっているカードが０枚か１枚
           clickedCardStatus['opened'] === false &&  // 選択されたカードがまだ表になっていない
           clickedCardStatus['cleared'] === false && // 選択されたカードが正解済みでない
