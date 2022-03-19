@@ -76,8 +76,10 @@
       <!-- 情報表示エリア ------------------------------------------------->
       <div class="information-area">
         <div class="information-block">
-          <div>選択されたカード: {{clickedIndex}}</div>
-          <div>1つ前に選択されたカード: {{previousClickedIndex}}</div>
+          <div>選択されたカード: {{clickedCardWord}}</div>
+          <div>1つ前に選択されたカード: {{previousClickedCardWord}}</div>
+          <div>コメント: {{informationComment}}</div>
+        </div>
         </div>
       </div>
     </div>
@@ -114,7 +116,9 @@ export default {
       selectedCategory: 'JavaScript',
       clickedIndex: null,
       previousClickedIndex: null,
-      openedCardNum: 0
+      openedCardNum: 0,
+      clickedCardWord: null,
+      previousClickedCardWord: null
     }
   },
   methods: {
@@ -124,6 +128,8 @@ export default {
       this.openedCardNum = 0;
       this.clickedIndex = null;
       this.previousClickedIndex = null;
+      this.clickedCardWord = null,
+      this.previousClickedCardWord = null;
     },
     // 設定エリア -----------------------------------------------
     // STARTボタンクリック時の処理
@@ -214,12 +220,16 @@ export default {
     clicked(rowNumber,colNumber) {
       const clickedIndex = this.cardIndex(rowNumber, colNumber);
       const clickedCardStatus = this.cardStatus[clickedIndex];
+      const clickedCardWord = this.cardWord(rowNumber,colNumber);
+      const previousClickedCardWord = this.cardWord(rowNumber,colNumber);
       if (this.openedCardNum < 2 &&                 // 表になっているカードが０枚か１枚
           clickedCardStatus['opened'] === false &&  // 選択されたカードがまだ表になっていない
           clickedCardStatus['cleared'] === false) { // 選択されたカードが正解済みでない
         // 選択中カード（今回・前回）を更新
         this.previousClickedIndex = this.clickedIndex;
+        this.previousClickedCardWord = this.clickedCardWord // 1つ前の選択肢したカード
         this.clickedIndex = clickedIndex;
+        this.clickedCardWord = clickedCardWord; // 選択したカード
         // 今回選択されたカードを開く
         this.cardStatus[this.clickedIndex]['opened'] = true;
         this.openedCardNum++;
