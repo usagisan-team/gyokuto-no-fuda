@@ -4,6 +4,7 @@
       <h1>玉兎の札-封印されし力-</h1>
     </header>
     <div class="body-area">
+    <div v-if="loading===true" class='loading'></div>
       <!-- 設定エリア ---------------------------------------------------->
       <div class="setting-area">
         <div class="setting-block">
@@ -11,28 +12,25 @@
           <div class="body__setting-category">
             <div class="setting-category-title">言語</div>
             <select v-model="selectedCategory" class="setting-category-select">
-              <option value="HTML">HTML</option>
-              <option value="CSS">CSS</option>
-              <option value="Ruby">Ruby</option>
-              <option value="Java">Java</option>
-              <option value="Linux">Linux</option>
-              <option value="JavaScript">JavaScript</option>
+              <option value="html">HTML</option>
+              <option value="css">CSS</option>
+              <option value="ruby">Ruby</option>
+              <option value="java">Java</option>
+              <option value="linux">Linux</option>
+              <option value="javascript">JavaScript</option>
             </select>
           </div>
-          <!-- 難易度 -->
-          <!-- body__setting--difficulty -->
-
           <!-- START -->
           <!-- body__setting--start -->
           <v-btn x-large v-on:click="gameStart()">
-            START
+            {{buttonText}}
           </v-btn>
         </div>
       </div>
 
       <!-- タイマーエリア ------------------------------------------------->
       <div class="timer-area">
-        <div class="moving-area">
+        <div :class="{'moving-area': startRabbit}">
           <img src="@/assets/usagi.png" alt="rabbit-image" class="moving-rabbit">
         </div>
         <div class="time-bar"></div>
@@ -89,7 +87,7 @@
   </span>
 </template>
 <script>
-// import axios from 'axios';
+import axios from 'axios';
 export default {
   data () {
     return {
@@ -113,14 +111,36 @@ export default {
         { word: "", explain: "", opened: false, cleared: false},
         { word: "", explain: "", opened: false, cleared: false}
       ],
-      selectedCategory: 'JavaScript',
+      selectedCategory: 'javascript',
       clickedIndex: null,
       previousClickedIndex: null,
       openedCardNum: 0,
       clickedCardWord: null,
       previousClickedCardWord: null,
       informationComment: null,
-      cardExplain: null
+      cardExplain: null,
+      startRabbit: false,
+      gameState: 'waiting', // 'waiting' or 'playing' or 'gameOver'
+      buttonText: 'START',
+      gameOverFlag: false,
+      gameOverTimer: undefined,
+      loading: false,
+    }
+  },
+  watch: {
+    // ゲームオーバーになっていないか監視している
+    gameOverFlag: function(newVal) {
+      if(newVal) {
+        // --- ゲームオーバーになった場合の処理 ---
+        // 裏のカードを全て表にする
+        for (const card of this.cardStatus) {
+            card['opened'] = true;
+        }
+        // メッセージを表示
+
+        // ゲームオーバーフラグをリセット
+        this.gameOverFlag = false;
+      }
     }
   },
   methods: {
@@ -136,10 +156,35 @@ export default {
     },
     // 設定エリア -----------------------------------------------
     // STARTボタンクリック時の処理
-    gameStart() {
+    async gameStart() {
+      this.controllgameState(); // ゲームの状態を管理
+      if(this.gameState === 'playing') this.loading = true // ゲームスタートで読み込み画面表示
       this.reverseAllCard();  // カードを全て裏にする
       this.refleshCardOpenStatus(); // カード開示状況の初期化
-      this.getQuestions();  // カードをセット
+      if(this.gameState === 'playing') await this.getQuestions();  // カードをセット
+      this.operateRabbit();  // うさぎを操作する
+      this.startTimer(); // タイマーを開始する
+      this.loading = false
+    },
+    // タイマーを開始する
+    startTimer() {
+      clearTimeout(this.gameOverTimer);
+      if(this.gameState === 'playing' || this.gameState === 'gameOver') {
+        this.gameOverTimer = setTimeout(() => {
+          this.gameOverFlag = true}
+          ,60100
+        )
+      }
+    },
+    // ゲームの状態を管理
+    controllgameState() {
+      if (this.gameState === 'playing' || this.gameState === 'gameOver') {
+        this.gameState = 'waiting'
+        this.buttonText = 'START'
+      } else {
+        this.gameState = 'playing'
+        this.buttonText = 'GIVE UP'
+      }
     },
     // 全てのカードを裏にする
     reverseAllCard() {
@@ -150,55 +195,24 @@ export default {
     },
     // バックエンドからカード情報を取得する
     async getQuestions() {
-      // const language = "html"
-      // await axios.get(`http://localhost:3000/api/v1/questions/${language}`).then(res => {
-      //   const questions = res.data['questions']
-      //   const length = this.cardStatus.length
-      //   for(let index = 0; index < length ; index++) {
-      //     this.cardStatus[index]['word'] = questions[index]['word']
-      //     this.cardStatus[index]['explain'] = questions[index]['explain']
-      //   }
-      // })
-
-      // ダミーデータ
-      this.cardStatus[0]['word'] = 'temp2',
-      this.cardStatus[0]['explain'] = 'temp2explain',
-      this.cardStatus[1]['word'] = 'temp1',
-      this.cardStatus[1]['explain'] = 'temp1explain',
-      this.cardStatus[2]['word'] = 'temp2',
-      this.cardStatus[2]['explain'] = 'temp2explain',
-      this.cardStatus[3]['word'] = 'temp3',
-      this.cardStatus[3]['explain'] = 'temp3explain',
-      this.cardStatus[4]['word'] = 'temp4',
-      this.cardStatus[4]['explain'] = 'temp4explain',
-      this.cardStatus[5]['word'] = 'temp5',
-      this.cardStatus[5]['explain'] = 'temp5explain',
-      this.cardStatus[6]['word'] = 'temp6',
-      this.cardStatus[6]['explain'] = 'temp6explain',
-      this.cardStatus[7]['word'] = 'temp1',
-      this.cardStatus[7]['explain'] = 'temp1explain',
-      this.cardStatus[8]['word'] = 'temp9',
-      this.cardStatus[8]['explain'] = 'temp9explain',
-      this.cardStatus[9]['word'] = 'temp7',
-      this.cardStatus[9]['explain'] = 'temp7explain',
-      this.cardStatus[10]['word'] = 'temp9',
-      this.cardStatus[10]['explain'] = 'temp9explain',
-      this.cardStatus[11]['word'] = 'temp4',
-      this.cardStatus[11]['explain'] = 'temp4explain',
-      this.cardStatus[12]['word'] = 'temp5',
-      this.cardStatus[12]['explain'] = 'temp5explain',
-      this.cardStatus[13]['word'] = 'temp6',
-      this.cardStatus[13]['explain'] = 'temp6explain',
-      this.cardStatus[14]['word'] = 'temp3',
-      this.cardStatus[14]['explain'] = 'temp3explain',
-      this.cardStatus[15]['word'] = 'temp8',
-      this.cardStatus[15]['explain'] = 'temp8explain',
-      this.cardStatus[16]['word'] = 'temp7',
-      this.cardStatus[16]['explain'] = 'temp7explain',
-      this.cardStatus[17]['word'] = 'temp8',
-      this.cardStatus[17]['explain'] = 'temp8explain'
+      await axios.get(`http://localhost:3000/api/v1/questions/${this.selectedCategory}`).then(res => {
+        const questions = res.data['questions']
+        const length = this.cardStatus.length
+        for(let index = 0; index < length ; index++) {
+          this.cardStatus[index]['word'] = questions[index]['word']
+          this.cardStatus[index]['explain'] = questions[index]['explain']
+        }
+      })
     },
     // タイマーエリア --------------------------------------------
+    // うさぎを操作する
+    operateRabbit() {
+      if (this.startRabbit) {
+        this.startRabbit = false;
+      } else {
+        this.startRabbit = true;
+      }
+    },
     // カードエリア ----------------------------------------------
     // 行と列からカードの配列番号を調べる
     cardIndex(rowNumber, colNumber) {
@@ -227,7 +241,8 @@ export default {
       const previousClickedCardWord = this.cardWord(rowNumber,colNumber);
       if (this.openedCardNum < 2 &&                 // 表になっているカードが０枚か１枚
           clickedCardStatus['opened'] === false &&  // 選択されたカードがまだ表になっていない
-          clickedCardStatus['cleared'] === false) { // 選択されたカードが正解済みでない
+          clickedCardStatus['cleared'] === false && // 選択されたカードが正解済みでない
+          this.gameState === 'playing') {           // スタートボタンが押されている
         // 選択中カード（今回・前回）を更新
         this.previousClickedIndex = this.clickedIndex;
         this.previousClickedCardWord = this.clickedCardWord // 1つ前の選択肢したカード
@@ -279,6 +294,15 @@ export default {
   background-color: rgb(215, 235, 236);
   height: 100%;
 }
+.loading {
+	position: fixed; /* ブラウザの定位置に固定 */
+	background: rgba(0, 0, 0, .5); /* 背景色を半透明の黒色に */
+	width: 100%; /* 要素の横幅を画面全体に */
+	height: 100%; /* 要素の高さを画面全体に */
+	top: 0; /* 要素の固定位置をブラウザ最上部に合わせる */
+	left: 0; /* 要素の固定位置をブラウザ左側に合わせる */
+	z-index: 1000; /* 要素をコンテンツより前面に（要調整） */
+}
 // 設定エリア ----------------------------------------------------
 .setting-area {
   position: relative;
@@ -324,6 +348,7 @@ export default {
   animation-duration: 60s; // アニメーションの時間
   animation-timing-function: linear; // 一定の速さで再生
   animation-direction: normal; // 左から右に再生
+  animation-fill-mode:forwards; // 最後の状態で停止
 }
 .moving-rabbit {
   width: 7%;
