@@ -1,5 +1,5 @@
 <template>
-  <span>
+  <span class="body">
     <header class="header-area">
       <h1>玉兎の札-封印されし力-</h1>
     </header>
@@ -233,7 +233,6 @@ export default {
       const clickedIndex = this.cardIndex(rowNumber, colNumber);
       const clickedCardStatus = this.cardStatus[clickedIndex];
       const clickedCardWord = this.cardWord(rowNumber,colNumber);
-      const previousClickedCardWord = this.cardWord(rowNumber,colNumber);
       if (this.openedCardNum < 2 &&                 // 表になっているカードが０枚か１枚
           clickedCardStatus['opened'] === false &&  // 選択されたカードがまだ表になっていない
           clickedCardStatus['cleared'] === false && // 選択されたカードが正解済みでない
@@ -282,11 +281,14 @@ export default {
 <style scoped lang="scss">
 .header-area {
   height: 60px;
-  background-color: rgb(187, 226, 241);
+  background-color: rgb(0, 0, 0);
+  color:#e6e6e6;
+  padding-top: 6px;
+  padding-left: 12px;
 }
 .body-area {
   border-top: solid 1px gray;
-  background-color: rgb(215, 235, 236);
+  background-color: rgb(68, 68, 68);
   height: 100%;
 }
 .loading {
@@ -298,6 +300,16 @@ export default {
 	left: 0; /* 要素の固定位置をブラウザ左側に合わせる */
 	z-index: 1000; /* 要素をコンテンツより前面に（要調整） */
 }
+.body {
+  position: fixed; /* ブラウザの定位置に固定 */
+	background: rgb(122, 122, 122); /* 背景色を半透明の黒色に */
+	width: 100%; /* 要素の横幅を画面全体に */
+	height: 100%; /* 要素の高さを画面全体に */
+	top: 0; /* 要素の固定位置をブラウザ最上部に合わせる */
+	left: 0; /* 要素の固定位置をブラウザ左側に合わせる */
+	z-index: 0; /* 要素をコンテンツより前面に（要調整） */
+}
+
 // 設定エリア ----------------------------------------------------
 .setting-area {
   position: relative;
@@ -321,15 +333,14 @@ export default {
   display: block;
   background-color: whitesmoke;
   border-radius: 6%;
-  height: 30px;
-  margin-top: 10px;
+  height: 50px;
   box-shadow: 1px 1px 4px grey;
 }
 .setting-category-title {
   text-align: center;
   padding: 14px 0;
   margin-right: 10px;
-  color: #5a5a5a;
+  color: #e6e6e6;
   font-weight: bold;
 }
 // タイマーエリア -------------------------------------------------
@@ -337,6 +348,7 @@ export default {
   width: 80%;
   height: 50px;
   margin: 60px auto;
+  margin-top: 20px;
 }
 .moving-area {
   animation-name: rabbit-image;
@@ -371,6 +383,7 @@ export default {
   width:594px;
   height: 456px;
   margin: 0 auto;
+  padding-top: 12px;
 }
 .card-col {
   display: flex;
