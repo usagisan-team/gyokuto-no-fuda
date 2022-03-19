@@ -74,8 +74,10 @@
       <!-- 情報表示エリア ------------------------------------------------->
       <div class="information-area">
         <div class="information-block">
-          <div>選択されたカード: {{clickedIndex}}</div>
-          <div>1つ前に選択されたカード: {{previousClickedIndex}}</div>
+          <div>選択されたカード: {{clickedCardWord}}</div>
+          <div>1つ前に選択されたカード: {{previousClickedCardWord}}</div>
+          <div>コメント: {{informationComment}}</div>
+          <div>カードの説明: {{cardExplain}}</div>
         </div>
       </div>
     </div>
@@ -113,6 +115,10 @@ export default {
       clickedIndex: null,
       previousClickedIndex: null,
       openedCardNum: 0,
+      clickedCardWord: null,
+      previousClickedCardWord: null,
+      informationComment: null,
+      cardExplain: null,
       startRabbit: false,
       gameState: 'waiting', // 'waiting' or 'playing' or 'gameOver'
       buttonText: 'START',
@@ -144,6 +150,9 @@ export default {
       this.openedCardNum = 0;
       this.clickedIndex = null;
       this.previousClickedIndex = null;
+      this.clickedCardWord = null;
+      this.previousClickedCardWord = null;
+      //this.cardExplain = null;
     },
     // 設定エリア -----------------------------------------------
     // STARTボタンクリック時の処理
@@ -228,16 +237,22 @@ export default {
     clicked(rowNumber,colNumber) {
       const clickedIndex = this.cardIndex(rowNumber, colNumber);
       const clickedCardStatus = this.cardStatus[clickedIndex];
+      const clickedCardWord = this.cardWord(rowNumber,colNumber);
+      const previousClickedCardWord = this.cardWord(rowNumber,colNumber);
       if (this.openedCardNum < 2 &&                 // 表になっているカードが０枚か１枚
           clickedCardStatus['opened'] === false &&  // 選択されたカードがまだ表になっていない
           clickedCardStatus['cleared'] === false && // 選択されたカードが正解済みでない
           this.gameState === 'playing') {           // スタートボタンが押されている
         // 選択中カード（今回・前回）を更新
         this.previousClickedIndex = this.clickedIndex;
+        this.previousClickedCardWord = this.clickedCardWord // 1つ前の選択肢したカード
         this.clickedIndex = clickedIndex;
+        this.clickedCardWord = clickedCardWord; // 選択したカード
         // 今回選択されたカードを開く
         this.cardStatus[this.clickedIndex]['opened'] = true;
         this.openedCardNum++;
+        this.informationComment = null;
+        this.cardExplain = null;
         // カードが2枚目開かれたとき、絵柄が同じが調べる
         if (this.openedCardNum === 2) {
           // 開いたカードの絵柄を確認できるディレイタイムを設けている
@@ -249,14 +264,19 @@ export default {
     cardPairCheck() {
       const clickedCardWord = this.cardStatus[this.clickedIndex]['word'];
       const previousClickedCardWord = this.cardStatus[this.previousClickedIndex]['word'];
+      const cardExplain = this.cardStatus[this.previousClickedIndex]['explain'];
+
       if (clickedCardWord === previousClickedCardWord) {
         // 同じ絵柄だった時 => カードを盤面から取り除く
         this.cardStatus[this.clickedIndex]['cleared'] = true;
         this.cardStatus[this.previousClickedIndex]['cleared'] = true;
+        this.informationComment = "当たり！"
+        this.cardExplain = cardExplain;
       } else {
         // 違う絵柄だった時 => カードを裏にする
         this.cardStatus[this.clickedIndex]['opened'] = false;
         this.cardStatus[this.previousClickedIndex]['opened'] = false;
+        this.informationComment = "ざんねん！"
       }
       // カード開示状況の初期化
       this.refleshCardOpenStatus();

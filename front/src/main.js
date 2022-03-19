@@ -3,6 +3,8 @@ import App from './App.vue'
 import vuetify from './plugins/vuetify'
 import router from './router'
 
+Vue.config.devtools = true;  // ChromeのDevtool追加に伴う設定
+
 Vue.config.productionTip = false
 
 new Vue({
