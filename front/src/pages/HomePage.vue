@@ -149,9 +149,7 @@ export default {
       this.controllgameState(); // ゲームの状態を管理
       this.reverseAllCard();  // カードを全て裏にする
       this.refleshCardOpenStatus(); // カード開示状況の初期化
-      if (this.gameState === 'playing') {
-        this.getQuestions();  // カードをセット
-      }
+      this.getQuestions();  // カードをセット
       this.operateRabbit();  // うさぎを操作する
       this.startTimer(); // タイマーを開始する
     },
@@ -185,7 +183,6 @@ export default {
     // バックエンドからカード情報を取得する
     async getQuestions() {
       await axios.get(`http://localhost:3000/api/v1/questions/${this.selectedCategory}`).then(res => {
-      // await axios.get(`http://localhost:3000/api/v1/questions/html`).then(res => {
         const questions = res.data['questions']
         console.log('questions: ', questions);
         const length = this.cardStatus.length
@@ -230,7 +227,8 @@ export default {
       const clickedCardStatus = this.cardStatus[clickedIndex];
       if (this.openedCardNum < 2 &&                 // 表になっているカードが０枚か１枚
           clickedCardStatus['opened'] === false &&  // 選択されたカードがまだ表になっていない
-          clickedCardStatus['cleared'] === false) { // 選択されたカードが正解済みでない
+          clickedCardStatus['cleared'] === false && // 選択されたカードが正解済みでない
+          this.gameState === 'playing') {           // スタートボタンが押されている
         // 選択中カード（今回・前回）を更新
         this.previousClickedIndex = this.clickedIndex;
         this.clickedIndex = clickedIndex;
