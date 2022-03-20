@@ -1,5 +1,5 @@
 <template>
-  <span>
+  <span class="body">
     <header class="header-area">
       <h1>玉兎の札-封印されし力-</h1>
     </header>
@@ -123,7 +123,9 @@ export default {
       loading: false,
       audioSuccess: new Audio(require('@/assets/sounds/Success.mp3')),
       audioFailure: new Audio(require('@/assets/sounds/Failure.mp3')),
-      audioGameOver: new Audio(require('@/assets/sounds/Game_Over.mp3'))
+      audioGameOver: new Audio(require('@/assets/sounds/Game_Over.mp3')),
+      audioGameClear: new Audio(require('@/assets/sounds/Game_Clear.mp3')),
+      remainingPairs: 9
     }
   },
   watch: {
@@ -132,10 +134,11 @@ export default {
       if(newVal) {
         // --- ゲームオーバーになった場合の処理 ---
         // 裏のカードを全て表にする
-        this.audioGameOver.play();
         for (const card of this.cardStatus) {
-            card['opened'] = true;
+          card['opened'] = true;
         }
+        // BGM
+        this.audioGameOver.play();
         // メッセージを表示
         this.informationComment = "時間切れ。また挑戦してね！"
         // カード説明をリセット
@@ -143,7 +146,24 @@ export default {
         // ゲームオーバーフラグをリセット
         this.gameOverFlag = false;
       }
-    }
+    },
+    remainingPairs: function(newVal) {
+      if(newVal === 0) {
+        // BGM
+        this.audioGameClear.play();
+        // メッセージを表示
+        this.informationComment = "ゲームクリア！おめでとう！"
+        // カード説明をリセット
+        this.cardExplain = null;
+        // タイマー停止（削除）
+        clearTimeout(this.gameOverTimer);
+        // うさぎ停止
+        this.startRabbit = false;
+        // その他設定をスタート前に戻す
+        this.gameState = 'waiting'
+        this.buttonText = 'START'
+      }
+    },
   },
   methods: {
     // 汎用メソッド ---------------------------------------------
@@ -156,14 +176,18 @@ export default {
     // 設定エリア -----------------------------------------------
     // STARTボタンクリック時の処理
     async gameStart() {
-      this.controllgameState(); // ゲームの状態を管理
+      this.controllGameState(); // ゲームの状態を管理
       if(this.gameState === 'playing') this.loading = true // ゲームスタートで読み込み画面表示
       this.reverseAllCard();  // カードを全て裏にする
       this.refleshCardOpenStatus(); // カード開示状況の初期化
       if(this.gameState === 'playing') await this.getQuestions();  // カードをセット
       this.operateRabbit();  // うさぎを操作する
       this.startTimer(); // タイマーを開始する
+      this.remainingPairs = 9;
+      this.informationComment = null;
       this.loading = false
+      //this.audioGameOver = null;
+      //this.audioGameClear = null;
     },
     // タイマーを開始する
     startTimer() {
@@ -176,7 +200,7 @@ export default {
       }
     },
     // ゲームの状態を管理
-    controllgameState() {
+    controllGameState() {
       if (this.gameState === 'playing' || this.gameState === 'gameOver') {
         this.gameState = 'waiting'
         this.buttonText = 'START'
@@ -272,6 +296,7 @@ export default {
         this.cardStatus[this.previousClickedIndex]['cleared'] = true;
         this.informationComment = "当たり！"
         this.cardExplain = cardExplain;
+        this.remainingPairs = this.remainingPairs - 1;
       } else {
         // 違う絵柄だった時 => カードを裏にする
         this.audioFailure.play();
@@ -288,11 +313,14 @@ export default {
 <style scoped lang="scss">
 .header-area {
   height: 60px;
-  background-color: rgb(187, 226, 241);
+  background-color: rgb(0, 0, 0);
+  color:#e6e6e6;
+  padding-top: 6px;
+  padding-left: 12px;
 }
 .body-area {
   border-top: solid 1px gray;
-  background-color: rgb(215, 235, 236);
+  background-color: rgb(68, 68, 68);
   height: 100%;
 }
 .loading {
@@ -304,6 +332,16 @@ export default {
 	left: 0; /* 要素の固定位置をブラウザ左側に合わせる */
 	z-index: 1000; /* 要素をコンテンツより前面に（要調整） */
 }
+.body {
+  position: fixed; /* ブラウザの定位置に固定 */
+	background: rgb(122, 122, 122); /* 背景色を半透明の黒色に */
+	width: 100%; /* 要素の横幅を画面全体に */
+	height: 100%; /* 要素の高さを画面全体に */
+	top: 0; /* 要素の固定位置をブラウザ最上部に合わせる */
+	left: 0; /* 要素の固定位置をブラウザ左側に合わせる */
+	z-index: 0; /* 要素をコンテンツより前面に（要調整） */
+}
+
 // 設定エリア ----------------------------------------------------
 .setting-area {
   position: relative;
@@ -327,22 +365,22 @@ export default {
   display: block;
   background-color: whitesmoke;
   border-radius: 6%;
-  height: 30px;
-  margin-top: 10px;
+  height: 50px;
   box-shadow: 1px 1px 4px grey;
 }
 .setting-category-title {
   text-align: center;
   padding: 14px 0;
   margin-right: 10px;
-  color: #5a5a5a;
+  color: #e6e6e6;
   font-weight: bold;
 }
 // タイマーエリア -------------------------------------------------
 .timer-area {
   width: 80%;
-  height: 50px;
-  margin: 60px auto;
+  height: 90px;
+  margin: 20px auto;
+  margin-top: 20px;
 }
 .moving-area {
   animation-name: rabbit-image;
@@ -377,6 +415,7 @@ export default {
   width:594px;
   height: 456px;
   margin: 0 auto;
+  padding-top: 12px;
 }
 .card-col {
   display: flex;
