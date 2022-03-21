@@ -80,7 +80,7 @@
       </div>
     </div>
     <footer>
-      <!-- 効果音提供 オトロジック(https://otologic.jp) -->
+      効果音提供 オトロジック(https://otologic.jp)
     </footer>
   </span>
 </template>
@@ -138,6 +138,7 @@ export default {
           card['opened'] = true;
         }
         // BGM
+        this.audioGameOver.currentTime = 0
         this.audioGameOver.play();
         // メッセージを表示
         this.informationComment = "時間切れ。また挑戦してね！"
@@ -150,6 +151,7 @@ export default {
     remainingPairs: function(newVal) {
       if(newVal === 0) {
         // BGM
+        this.audioGameClear.currentTime = 0
         this.audioGameClear.play();
         // メッセージを表示
         this.informationComment = "ゲームクリア！おめでとう！"
@@ -186,8 +188,6 @@ export default {
       this.remainingPairs = 9;
       this.informationComment = null;
       this.loading = false
-      //this.audioGameOver = null;
-      //this.audioGameClear = null;
     },
     // タイマーを開始する
     startTimer() {
@@ -291,6 +291,7 @@ export default {
 
       if (clickedCardWord === previousClickedCardWord) {
         // 同じ絵柄だった時 => カードを盤面から取り除く
+        this.audioSuccess.currentTime = 0;
         this.audioSuccess.play();
         this.cardStatus[this.clickedIndex]['cleared'] = true;
         this.cardStatus[this.previousClickedIndex]['cleared'] = true;
@@ -299,6 +300,7 @@ export default {
         this.remainingPairs = this.remainingPairs - 1;
       } else {
         // 違う絵柄だった時 => カードを裏にする
+        this.audioFailure.currentTime = 0;
         this.audioFailure.play();
         this.cardStatus[this.clickedIndex]['opened'] = false;
         this.cardStatus[this.previousClickedIndex]['opened'] = false;
