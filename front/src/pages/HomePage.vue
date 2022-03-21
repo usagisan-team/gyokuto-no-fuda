@@ -10,7 +10,7 @@
         <div class="setting-block">
           <!-- カテゴリ選択 -->
           <div class="body__setting-category">
-            <div class="setting-category-title">言語</div>
+            <div class="setting-category-title">ジャンル</div>
             <select v-model="selectedCategory" class="setting-category-select">
               <option value="html">HTML</option>
               <option value="css">CSS</option>
@@ -31,7 +31,7 @@
       <!-- タイマーエリア ------------------------------------------------->
       <div class="timer-area">
         <div :class="{'moving-area': startRabbit}">
-          <img src="@/assets/usagi.png" alt="rabbit-image" class="moving-rabbit">
+          <img src="@/assets/img/usagi.png" alt="rabbit-image" class="moving-rabbit">
         </div>
         <div class="time-bar"></div>
       </div>
@@ -51,7 +51,7 @@
                 <!-- カードの表 -->
                 <template v-if="checkCleared(rowNumber,colNumber) === false">
                   <v-img
-                    src='~/../assets/card_front.png'
+                    src='~/../assets/img/card_front.png'
                     max-width="100">
                   </v-img>
                   <span class='card-text'>{{ cardWord(rowNumber,colNumber) }}</span>
@@ -60,7 +60,7 @@
                 <template v-if="checkOpened(rowNumber,colNumber) === false">
                   <div class=card-back>
                     <v-img
-                      src='~/../assets/card_back_red.png'
+                      src='~/../assets/img/card_back_red.png'
                       max-width="100">
                     </v-img>
                   </div>
@@ -121,6 +121,10 @@ export default {
       gameOverFlag: false,
       gameOverTimer: undefined,
       loading: false,
+      audioSuccess: new Audio(require('@/assets/sounds/Success.mp3')),
+      audioFailure: new Audio(require('@/assets/sounds/Failure.mp3')),
+      audioGameOver: new Audio(require('@/assets/sounds/Game_Over.mp3')),
+      audioGameClear: new Audio(require('@/assets/sounds/Game_Clear.mp3')),
       remainingPairs: 9
     }
   },
@@ -131,8 +135,10 @@ export default {
         // --- ゲームオーバーになった場合の処理 ---
         // 裏のカードを全て表にする
         for (const card of this.cardStatus) {
-            card['opened'] = true;
+          card['opened'] = true;
         }
+        // BGM
+        this.audioGameOver.play();
         // メッセージを表示
         this.informationComment = "時間切れ。また挑戦してね！"
         // カード説明をリセット
@@ -143,6 +149,8 @@ export default {
     },
     remainingPairs: function(newVal) {
       if(newVal === 0) {
+        // BGM
+        this.audioGameClear.play();
         // メッセージを表示
         this.informationComment = "ゲームクリア！おめでとう！"
         // カード説明をリセット
@@ -155,7 +163,7 @@ export default {
         this.gameState = 'waiting'
         this.buttonText = 'START'
       }
-    }
+    },
   },
   methods: {
     // 汎用メソッド ---------------------------------------------
@@ -178,6 +186,8 @@ export default {
       this.remainingPairs = 9;
       this.informationComment = null;
       this.loading = false
+      //this.audioGameOver = null;
+      //this.audioGameClear = null;
     },
     // タイマーを開始する
     startTimer() {
@@ -251,6 +261,7 @@ export default {
       const clickedIndex = this.cardIndex(rowNumber, colNumber);
       const clickedCardStatus = this.cardStatus[clickedIndex];
       const clickedCardWord = this.cardWord(rowNumber,colNumber);
+
       if (this.openedCardNum < 2 &&                 // 表になっているカードが０枚か１枚
           clickedCardStatus['opened'] === false &&  // 選択されたカードがまだ表になっていない
           clickedCardStatus['cleared'] === false && // 選択されたカードが正解済みでない
@@ -280,6 +291,7 @@ export default {
 
       if (clickedCardWord === previousClickedCardWord) {
         // 同じ絵柄だった時 => カードを盤面から取り除く
+        this.audioSuccess.play();
         this.cardStatus[this.clickedIndex]['cleared'] = true;
         this.cardStatus[this.previousClickedIndex]['cleared'] = true;
         this.informationComment = "当たり！"
@@ -287,6 +299,7 @@ export default {
         this.remainingPairs = this.remainingPairs - 1;
       } else {
         // 違う絵柄だった時 => カードを裏にする
+        this.audioFailure.play();
         this.cardStatus[this.clickedIndex]['opened'] = false;
         this.cardStatus[this.previousClickedIndex]['opened'] = false;
         this.informationComment = "ざんねん！"
@@ -327,6 +340,7 @@ export default {
 	top: 0; /* 要素の固定位置をブラウザ最上部に合わせる */
 	left: 0; /* 要素の固定位置をブラウザ左側に合わせる */
 	z-index: 0; /* 要素をコンテンツより前面に（要調整） */
+  overflow: scroll
 }
 
 // 設定エリア ----------------------------------------------------
@@ -366,7 +380,7 @@ export default {
 .timer-area {
   width: 80%;
   height: 90px;
-  margin: 60px auto;
+  margin: 20px auto;
   margin-top: 20px;
 }
 .moving-area {
